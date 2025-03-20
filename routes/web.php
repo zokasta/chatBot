@@ -23,16 +23,30 @@ Route::get('/chatbot', function () {
 })->middleware('auth')->name('chatbot');
 
 
-// Route::post('/logout', function () {
-//     Auth::logout();
-//     return redirect()->route('login');
-// })->name('logout');
-Route::post('/logout', function (Request $request) {
+Route::post('/logout', function () {
     Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
     return redirect()->route('login');
 })->name('logout');
+// Route::post('/logout', function (Request $request) {
+//     Auth::logout();
+//     $request->session()->invalidate();
+//     $request->session()->regenerateToken();
+//     return redirect()->route('login');
+// })->name('logout');
 
 Route::get('/chatbot', [LoginController::class, 'dashboard'])->middleware('auth')->name('chatbot');
 
+
+// file upload route
+
+Route::post('/upload-file', function (Request $request) {
+    if ($request->hasFile('file')) {
+        $file = $request->file('file');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $file->storeAs('uploads', $filename, 'public'); // ✅ File store in `storage/app/public/uploads`
+
+        return response()->json(['message' => 'File uploaded successfully!', 'filename' => $filename]);
+    }
+
+    return response()->json(['message' => 'No file uploaded!'], 400);
+})->name('upload.file');
