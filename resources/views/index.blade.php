@@ -318,14 +318,7 @@
              document.getElementById("dropdown").classList.toggle("hidden");
         }
 
-        //scroll karne ke liye
-        function scrollToBottom() {
-         let chatContainer = document.getElementById("chat-container");
-         chatContainer.scrollTop = chatContainer.scrollHeight;
-}
-
-        // Jab bhi message add ho, yeh function call ho:
-    setTimeout(scrollToBottom, 100);
+      
 
 
     // upload file logic-------------------
