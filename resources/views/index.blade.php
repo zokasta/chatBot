@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+{{-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cyberpunk Chatbot</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         body {
             background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
@@ -204,10 +205,7 @@
                 <p>Cyberpunk Chatbot</p>
             </div>
             <div class="user-info">
-                {{-- <img src="user-avatar.png" alt="User Avatar">
-                <img src="{{ asset('storage/' . auth()->user()->avatar) }}" class="w-10 h-10 rounded-full">
 
-                <p>Username</p> --}}
                 <div class="relative">
                 <button onclick="toggleDropdown()" class="flex items-center space-x-2 bg-gray-800 text-white px-3 py-2 rounded-full">
 
@@ -225,32 +223,11 @@
                 </div>
                 </div>
 
-                {{-- <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="text-red-500 hover:text-red-700">Logout</button>
-                </form> --}}
-                {{-- <button class="logout-btn">Logout</button> --}}
+
             </div>
         </div>
 
-        {{-- <nav class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-lg">
-            <!-- Left: Logo -->
-            <div class="text-cyan-400 font-bold text-lg">
-                ChatBot
-            </div> --}}
 
-            <!-- Right: Avatar & Logout -->
-            {{-- <div class="flex items-center space-x-4">
-                <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/40' }}"
-                     alt="User Avatar" class="w-10 h-10 rounded-full border-2 border-cyan-400">
-                <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
-
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="text-red-400 hover:text-red-600">Logout</button>
-                </form>
-            </div>
-        </nav> --}}
 
 
 
@@ -273,7 +250,10 @@
             </label>
             <input type="file" id="fileInput" class="file-upload-input">
             <input type="text" id="message" class="message-input" placeholder="Type a message...">
-            <button class="send-btn" onclick="sendMessage()">Send</button>
+            <div id="button-submit" class="text-center" style="background: #4acfee;height: 100%;width: 50px;border-radius: 5px;">
+                <i class="fa fa-paper-plane text white" aria-hidden="true" style="line-height: 45px;"></i>
+
+        </div>
         </div>
         </div>
 
@@ -318,7 +298,7 @@
              document.getElementById("dropdown").classList.toggle("hidden");
         }
 
-      
+
 
 
     // upload file logic-------------------
@@ -349,4 +329,100 @@
 // upload file end-------------------------------------------------
     </script>
 </body>
+</html> --}}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" integrity="sha512-5A8nwdMOWrSz20fDsjczgUidUBR8liPYU+WymTZP1lmY9G6Oc7HlZv156XqnsgNUzTyMefFTcsFH/tnJE/+xBg==" crossorigin="anonymous" referrerpolicy="no-referrer" /> \
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    ::-webkit-scrollbar{
+        width: 5px;
+    }
+    ::-webkit-scrollbar-track{
+        background: #13254c;
+    }
+    ::-webkit-scrollbar-thumb{
+        background: #061128;
+    }
+</style>
+<body style="background: #05113b;">
+    <div>
+        <div class="container-fluid m-0 d-flex p-2">
+            <div class="pl-2" style="width: 40px;height: 50px;font-size: 180%;">
+                <i class="fa fa-angle-double-left text-white mt-2"></i>
+            </div>
+            <div style="width: 50px;height: 50px;">
+                <img src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" width="100%" height="100%" style="border-radius: 50px;">
+            </div>
+            <div class="text-white font-weight-bold ml-2 mt-2">
+                ChatBot
+            </div>
+        </div>
+        <div style="background: #061128;height: 2px;"></div>
+        <div id="content-box" class="container-fluid p-2" style="height: calc(100vh - 130px);overflow-y: scroll;">
+
+
+        </div>
+        <div class="container-fluid w-100 px-3 py-2 d-flex" style="background: #131f45;height: 62px;">
+            <div class="mr-2 pl-2" style="background: #ffffff1c;width: calc(100% - 45px);border-radius: 5px;">
+                <input id="input" class="text-white" type="text" name="input" style="background: none;width: 100%;height: 100%;border: 0;outline: none;">
+            </div>
+            <div id="button-submit" class="text-center" style="background: #4acfee;height: 100%;width: 50px;border-radius: 5px;">
+                <i class="fa fa-paper-plane text-white" aria-hidden="true" style="line-height: 45px;"></i>
+
+            </div>
+        </div>
+    </div>
+
+</body>
 </html>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script>
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    })
+    $('#button-submit').on('click',function(){
+        $value = $('#input').val();
+        $('#content-box').append(`<div class="mb-2">
+                <div class="float-right px-3 py-2" style="width: 270px;background: #4acfee;border-radius: 10px;float: right;font-size: 85%;">
+                    `+$value+`
+                </div>
+                <div style="clear: both;"></div>
+            </div>`);
+
+
+            $.ajax({
+                type: 'post',
+                url: '{{url('send')}}',
+                data: {
+                    'input':$value
+                },
+                success: function(data){
+                    $('#content-box').append(` <div class="d-flex mb-2">
+                <div class="mr-2" style="width: 45px;height: 45px;">
+                <img src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" width="100%" height="100%" style="border-radius: 50px;">
+                </div>
+                <div class="text-white px-3 py-2" style="width: 270px;background: #13254b;border-radius: 10px;font-size: 85%;">
+                    `+data+`
+                </div>
+            </div>`)
+            $value = $('#input').val('');
+                }
+            })
+    })
+</script>

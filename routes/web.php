@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ChatBotController;
 use App\Http\Middleware\Authenticate;
 
 
@@ -27,12 +28,7 @@ Route::post('/logout', function () {
     Auth::logout();
     return redirect()->route('login');
 })->name('logout');
-// Route::post('/logout', function (Request $request) {
-//     Auth::logout();
-//     $request->session()->invalidate();
-//     $request->session()->regenerateToken();
-//     return redirect()->route('login');
-// })->name('logout');
+
 
 Route::get('/chatbot', [LoginController::class, 'dashboard'])->middleware('auth')->name('chatbot');
 
@@ -50,3 +46,8 @@ Route::post('/upload-file', function (Request $request) {
 
     return response()->json(['message' => 'No file uploaded!'], 400);
 })->name('upload.file');
+
+
+
+//for sending the data
+Route::post('send',[ChatBotController::class,'sendChat']);
