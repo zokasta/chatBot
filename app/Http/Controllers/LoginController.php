@@ -34,7 +34,7 @@ class LoginController extends Controller
 
     public function dashboard()
     {
-        return view('index'); // Ensure 'index' is the correct chatbot page
+        return view('greating'); // Ensure 'index' is the correct chatbot page
     }
 
 }

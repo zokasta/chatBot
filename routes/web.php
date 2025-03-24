@@ -30,7 +30,7 @@ Route::post('/logout', function () {
 })->name('logout');
 
 
-Route::get('/chatbot', [LoginController::class, 'dashboard'])->middleware('auth')->name('chatbot');
+Route::get('/home', [LoginController::class, 'dashboard'])->middleware('auth')->name('chatbot');
 
 
 // file upload route
@@ -51,3 +51,7 @@ Route::post('/upload-file', function (Request $request) {
 
 //for sending the data
 Route::post('/send',[ChatBotController::class,'chat']);
+
+Route::get('/chat', function(){
+    return view('index');
+})->name('chats');
