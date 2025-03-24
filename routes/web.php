@@ -50,4 +50,4 @@ Route::post('/upload-file', function (Request $request) {
 
 
 //for sending the data
-Route::post('send',[ChatBotController::class,'sendChat']);
+Route::post('/send',[ChatBotController::class,'chat']);
