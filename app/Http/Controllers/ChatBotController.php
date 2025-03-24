@@ -27,39 +27,58 @@
 
 
 //gemini
-
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Google\Client;
-use Google\Service\GeminiAI;  // Gemini API Client
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ChatbotController extends Controller
 {
     public function chat(Request $request)
     {
-        // 1. Gemini API Key
-        $apiKey = env('GEMINI_API_KEY');  // .env file mai API key store karo
-
-        // 2. User ka input le lo
-        $userMessage = $request->input('message');
-
-        // 3. Gemini API Client Initialize Karo
-        $client = new Client();
-        $client->setApplicationName("Laravel Gemini Chatbot");
-        $client->setDeveloperKey($apiKey);
-
-        // 4. Gemini AI Service Initialize Karo
-        $gemini = new GeminiAI($client);
-
-        // 5. API Call karke Response lo
         try {
-            $response = $gemini->generateContent($userMessage);
-            return response()->json(['reply' => $response->text]);
+            $request->validate([
+                'message' => 'required|string'
+            ]);
+
+            $userMessage = $request->input('message');
+            $apiKey = env('GEMINI_API_KEY');
+
+            if (!$apiKey) {
+                return response()->json(['error' => 'Gemini API key is missing!'], 500);
+            }
+
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}";
+
+            $payload = [
+                "contents" => [
+                    [
+                        "parts" => [
+                            ["text" => $userMessage]
+                        ]
+                    ]
+                ]
+            ];
+
+            $response = Http::post($url, $payload);
+            $data = $response->json();
+
+            Log::info('Gemini API Response:', $data);
+
+            if (isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+                return response()->json([
+                    'reply' => $data['candidates'][0]['content']['parts'][0]['text']
+                ]);
+            }
+
+            return response()->json(['error' => 'Invalid response format from Gemini AI'], 500);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => 'Validation failed: ' . $e->getMessage()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+            Log::error('Chatbot API Error: ' . $e->getMessage());
+
+            return response()->json(['error' => 'Something went wrong: ' . $e->getMessage()], 500);
         }
     }
 }
-

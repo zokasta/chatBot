@@ -272,14 +272,14 @@
 
             let userDiv = document.createElement('div');
             userDiv.classList.add('message', 'user-msg');
-            userDiv.innerHTML = `<img src='{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/40' }}' alt='User Avatar' class='avatar'><span>${userMsg}</span>`;
+            userDiv.innerHTML = <img src='{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/40' }}' alt='User Avatar' class='avatar'><span>${userMsg}</span>;
             chatbox.appendChild(userDiv);
             msgInput.value = '';
             chatbox.scrollTop = chatbox.scrollHeight;
 
             let typingDiv = document.createElement('div');
             typingDiv.classList.add('message', 'bot-msg', 'typing');
-            typingDiv.innerHTML = `<img src='https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg' alt='Bot Avatar' class='avatar'><span>...</span>`;
+            typingDiv.innerHTML = <img src='https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg' alt='Bot Avatar' class='avatar'><span>...</span>;
             chatbox.appendChild(typingDiv);
             chatbox.scrollTop = chatbox.scrollHeight;
 
@@ -287,7 +287,7 @@
                 typingDiv.remove();
                 let botDiv = document.createElement('div');
                 botDiv.classList.add('message', 'bot-msg');
-                botDiv.innerHTML = `<img src='https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg' alt='Bot Avatar' class='avatar'><span>I'm here to help! What do you need?</span>`;
+                botDiv.innerHTML = <img src='https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg' alt='Bot Avatar' class='avatar'><span>I'm here to help! What do you need?</span>;
                 chatbox.appendChild(botDiv);
                 chatbox.scrollTop = chatbox.scrollHeight;
             }, 1500);
@@ -400,7 +400,7 @@
         $value = $('#input').val();
         $('#content-box').append(`<div class="mb-2">
                 <div class="float-right px-3 py-2" style="width: 270px;background: #4acfee;border-radius: 10px;float: right;font-size: 85%;">
-                    `+$value+`
+                   ${$value}
                 </div>
                 <div style="clear: both;"></div>
             </div>`);
@@ -410,7 +410,7 @@
                 type: 'post',
                 url: '{{url('send')}}',
                 data: {
-                    'input':$value
+                    'message':$value
                 },
                 success: function(data){
                     $('#content-box').append(` <div class="d-flex mb-2">
@@ -418,7 +418,7 @@
                 <img src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" width="100%" height="100%" style="border-radius: 50px;">
                 </div>
                 <div class="text-white px-3 py-2" style="width: 270px;background: #13254b;border-radius: 10px;font-size: 85%;">
-                    `+data+`
+                ${data.reply}
                 </div>
             </div>`)
             $value = $('#input').val('');
