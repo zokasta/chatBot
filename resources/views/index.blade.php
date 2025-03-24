@@ -410,7 +410,7 @@
                 type: 'post',
                 url: '{{url('send')}}',
                 data: {
-                    'input':$value
+                    'message':$value
                 },
                 success: function(data){
                     $('#content-box').append(` <div class="d-flex mb-2">
@@ -418,7 +418,7 @@
                 <img src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" width="100%" height="100%" style="border-radius: 50px;">
                 </div>
                 <div class="text-white px-3 py-2" style="width: 270px;background: #13254b;border-radius: 10px;font-size: 85%;">
-                    `+data+`
+                    `+data.reply+`
                 </div>
             </div>`)
             $value = $('#input').val('');
