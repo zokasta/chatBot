@@ -211,6 +211,16 @@
 }
 
 
+#file-upload-btn:hover {
+    opacity: 0.8;
+}
+
+.fa-plus {
+    font-size: 1.2rem;
+    transition: all 0.2s;
+}
+
+
 </style>
 <body style="background: #0a0a12;">
     <!-- EXACTLY YOUR ORIGINAL HTML STRUCTURE -->
@@ -250,7 +260,12 @@
             <!-- Messages appear here -->
         </div>
         <div class="container-fluid w-100 px-3 py-2 d-flex" style="background: #07070e;height: 62px;">
+            <div id="file-upload-btn" style="width:40px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                <i class="fas fa-plus text-white" style="margin-left: 20px;"></i>
+                <input type="file" id="file-input" style="display:none;" accept=".pdf,.jpg,.png">
+            </div>
             <div class="mr-2 pl-2" style="background: #1a1a2e;width: calc(100% - 45px);border-radius: 5px;">
+
                 <input id="input" class="text-white" type="text" name="input" style="background: none;width: 100%;height: 100%;border: 0;outline: none;" placeholder="Type Something...">
             </div>
             <div id="button-submit" class="text-center" style="background: #3b82f6;height: 100%;width: 50px;border-radius: 5px;">
@@ -413,6 +428,20 @@ $(document).ready(function() {
 $('#input').on('keypress', function(e) {
     if (e.which === 13) { // 13 is Enter key code
         $('#button-submit').click(); // Trigger click on send button
+    }
+});
+
+// -----------------------------------------------------------
+// Trigger file input when plus button is clicked
+document.getElementById('file-upload-btn').addEventListener('click', function() {
+    document.getElementById('file-input').click();
+});
+
+// Handle selected file
+document.getElementById('file-input').addEventListener('change', function(e) {
+    if (e.target.files.length > 0) {
+        alert('File selected: ' + e.target.files[0].name);
+        // Add your file upload logic here
     }
 });
 
