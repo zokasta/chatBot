@@ -1,428 +1,587 @@
-{{-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyberpunk Chatbot</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-
+    <title>ChatBot</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
+        :root {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --accent-color: #5e72e4;
+            --user-message: #5e72e4;
+            --bot-message: #edf2f7;
+            --sidebar-bg: #2d3748;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --profile-bg: #ffffff;
+        }
+
         body {
-            background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+            background: var(--bg-primary);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            overflow: hidden !important;
+        }
+
+        /* Header */
+        .header-container {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-left: 60px;
+            /* Space for toggle button */
+        }
+
+        .logo-text {
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        /* Profile Section */
+        .profile-section {
+            margin-left: auto;
+        }
+
+        /* Chat Container */
+        #content-box {
+            background: var(--bg-primary);
+            height: calc(100vh - 130px);
+            padding: 20px;
+            overflow-y: scroll;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        #content-box::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
+            display: none !important;
+        }
+
+        /* Messages */
+        .user-message {
+            background: var(--user-message);
             color: white;
-            font-family: 'Arial', sans-serif;
-        }
-        .chat-container {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 20px;
-        }
-        .chat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-bottom: 10px;
-        }
-        .chat-header .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .chat-header .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .chat-header img {
-            height: 40px;
-            border-radius: 50%;
-        }
-        .logout-btn {
-            background: red;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .chat-box {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-        .message {
+            border-radius: 18px 4px 18px 18px;
             max-width: 70%;
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
+            margin-left: auto;
+            margin-bottom: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .bot-message {
+            background: var(--bot-message);
+            color: var(--text-primary);
+            border-radius: 4px 18px 18px 18px;
+            max-width: 70%;
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Input Area */
+        .input-container {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 12px 20px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.03);
             display: flex;
             align-items: center;
-            gap: 10px;
-            animation: fadeIn 0.3s ease-in-out;
         }
-        .user-msg {
-            background: rgba(0, 255, 255, 0.2);
-            align-self: flex-end;
-            flex-direction: row-reverse;
+
+        .message-input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 12px 20px;
+            flex-grow: 1;
+            margin: 0 12px;
+            color: var(--text-primary);
+            outline: none;
         }
-        .bot-msg {
-            background: rgba(255, 0, 255, 0.2);
-            align-self: flex-start;
+
+        .send-button {
+            background: var(--accent-color);
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+            color: white;
         }
-        .typing {
-            font-style: italic;
-            color: #ccc;
-            font-size: 18px;
-            font-weight: bold;
+
+        .send-button:hover {
+            background: #4a63d2;
+            transform: translateY(-2px);
         }
-        .avatar {
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: -280px;
+            padding: 1.5rem;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            overflow-y: auto;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none;
+            /* Chrome/Safari/Opera */
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .toggle-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background: var(--accent-color);
             width: 40px;
             height: 40px;
             border-radius: 50%;
-        }
-        .input-container {
             display: flex;
-            gap: 10px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            border-top: 2px solid cyan;
-        }
-        .input-box {
-            flex-grow: 1;
-            padding: 10px;
-            border-radius: 5px;
-            background: #1a1a2e;
+            align-items: center;
+            justify-content: center;
+            border: none;
             color: white;
-            outline: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .send-btn {
-            padding: 10px 20px;
-            background: cyan;
-            color: black;
-            font-weight: bold;
-            border-radius: 5px;
+
+        .toggle-btn.shifted {
+            left: 300px;
+        }
+
+        .main-content {
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 0;
+        }
+
+        .main-content.shifted {
+            margin-left: 280px;
+        }
+
+        /* Profile Dropdown */
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--profile-bg);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
             cursor: pointer;
-            transition: 0.3s;
-        }
-        .send-btn:hover {
-            background: magenta;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* file upload css */
-        .file-upload-container {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-}
+        .profile-btn:hover {
+            background: var(--bg-primary);
+        }
 
-/* ✅ Message Input - Attach File Inside */
-.message-input-wrapper {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    background: rgba(255, 255, 255, 0.08);
-    color: #e0e0e0;
-    padding: 8px 14px;
-    border-radius: 8px;
-    outline: none;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    position: relative;
-}
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            object-fit: cover;
+        }
 
-/* ✅ Plus Button Inside Input */
-.file-upload-label {
-    position: absolute;
-    left: 10px;
-    cursor: pointer;
-    font-size: 18px;
-    color: #bbb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    transition: all 0.2s ease-in-out;
-}
+        .dropdown-menu {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+            position: absolute;
+            right: 0;
+            min-width: 140px;
+            z-index: 100;
+        }
 
-.file-upload-label:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
+        .dropdown-item {
+            padding: 8px 16px;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: block;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
 
-.file-upload-input {
-    display: none;
-}
+        .dropdown-item:hover {
+            background: var(--bg-primary);
+        }
 
-.message-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: #e0e0e0;
-    padding-left: 40px; /* Space for plus button */
-    outline: none;
-}
+        /* Animations */
+        @keyframes dot-pulse {
 
-/* ✅ Send Button - Clean & Modern */
-.send-button {
-    background: #333;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 15px;
-    color: #ddd;
-    transition: all 0.2s ease-in-out;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    margin-left: 8px;
-}
+            0%,
+            100% {
+                opacity: 0.2;
+                transform: translateY(0);
+            }
 
-.send-button:hover {
-    background: #444;
-}
+            50% {
+                opacity: 1;
+                transform: translateY(-3px);
+            }
+        }
+
+        .thinking-dots span {
+            animation: dot-pulse 1.5s infinite;
+        }
+
+        .thinking-dots span:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .thinking-dots span:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        .main-content {
+            overflow: hidden !important;
+        }
 
 
+        /* dropdown logo */
+        .logo-container .dropdown {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
 
+    .logo-container .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        padding: 8px 0;
+        min-width: 150px;
+        z-index: 1000;
+        display: none;
+    }
+
+    .logo-container .dropdown-menu.show {
+        display: block;
+    }
+
+    .logo-container .dropdown-item {
+        padding: 8px 16px;
+        color: var(--text-primary);
+        text-decoration: none;
+        display: block;
+    }
+
+    .logo-container .dropdown-item:hover {
+        background: var(--bg-primary);
+    }
     </style>
 </head>
+
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <div class="logo">
-                <img src="https://cdn.dribbble.com/userupload/38950926/file/original-8d460ccfb0a8d2372b2227677a79cb33.jpg?format=webp&resize=400x300&vertical=center" alt="Chatbot Logo">
-                <p>Cyberpunk Chatbot</p>
+    <!-- Toggle Button -->
+    <button id="toggleBtn" class="toggle-btn">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header mb-4">
+            <h4 class="mb-0">MasterBot</h4>
+        </div>
+
+        <button class="btn w-100 my-3" id="newChatBtn" style="background: var(--accent-color); color: white; border: none;">+ New
+            Chat</button>
+            <div id="chat-list">
+                <!-- Dynamic chat buttons yahan aayenge -->
             </div>
-            <div class="user-info">
+    </div>
 
-                <div class="relative">
-                <button onclick="toggleDropdown()" class="flex items-center space-x-2 bg-gray-800 text-white px-3 py-2 rounded-full">
+    <!-- Main Content -->
+    <div id="mainContent" class="main-content">
+        <div class="header-container">
+            <!-- Update your logo container with this code -->
+<div class="logo-container">
+    <div class="dropdown">
+        <!-- Wrapped both logo and text in dropdown trigger -->
+        <div class="d-flex align-items-center dropdown-toggle" id="logoDropdown" style="cursor: pointer;">
+            <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+            <span class="logo-text">MasterBot</span>
+        </div>
+        <ul class="dropdown-menu" aria-labelledby="logoDropdown">
+            <li><a class="dropdown-item" href="#">OpenAI</a></li>
+            <li><a class="dropdown-item" href="#">Llama</a></li>
+            <li><a class="dropdown-item" href="#">Microsoft</a></li>
+        </ul>
+    </div>
+</div>
 
-                    <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/40' }}"
-                         alt="User Avatar" class="w-10 h-10 rounded-full border-2 border-cyan-400">
 
-                         <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
-                </button>
-                 <!-- Dropdown Menu -->
-                 <div id="dropdown" class="absolute right-0 mt-2 w-40 bg-gray-900 text-white rounded-lg shadow-lg hidden">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="block px-4 py-2 w-full text-left hover:bg-gray-700">Logout</button>
-                    </form>
+            <div class="profile-section">
+                <div class="user-info">
+                    <button onclick="toggleDropdown()" class="profile-btn">
+                        <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/40' }}"
+                            alt="User Avatar" class="profile-avatar">
+                        <span>{{ auth()->user()->name }}</span>
+                    </button>
+                    <div id="dropdown" class="dropdown-menu">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="dropdown-item">Logout</button>
+                        </form>
+                    </div>
                 </div>
-                </div>
-
-
             </div>
         </div>
 
-
-
-
-
-
-        <div class="chat-box" id="chatbox">
-            <div class="message bot-msg">
-                <img src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" alt="Bot Avatar" class="avatar">
-                <span>Hello! How can I assist you today?</span>
-            </div>
+        <div id="content-box">
+            <!-- Messages will appear here -->
         </div>
-
-
-
-
 
         <div class="input-container">
-            <div class="message-input-wrapper">
-            <label for="fileInput" class="file-upload-label">
-                <i class="fas fa-plus">+</i> <!-- ✅ Plus Button -->
-            </label>
-            <input type="file" id="fileInput" class="file-upload-input">
-            <input type="text" id="message" class="message-input" placeholder="Type a message...">
-            <div id="button-submit" class="text-center" style="background: #4acfee;height: 100%;width: 50px;border-radius: 5px;">
-                <i class="fa fa-paper-plane text white" aria-hidden="true" style="line-height: 45px;"></i>
-
+            <div id="file-upload-btn" style="cursor: pointer;">
+                <i class="fas fa-plus" style="color: var(--text-secondary);"></i>
+                <input type="file" id="file-input" style="display: none;" accept=".pdf,.jpg,.png">
+            </div>
+            <input id="input" class="message-input" type="text" placeholder="Type Something...">
+            <button id="button-submit" class="send-button">
+                <i class="fa fa-paper-plane"></i>
+            </button>
         </div>
-        </div>
-        </div>
-
     </div>
 
-
-
-
-
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script>
-        function sendMessage() {
-            let msgInput = document.getElementById('message');
-            let chatbox = document.getElementById('chatbox');
-            let userMsg = msgInput.value.trim();
-            if (userMsg === '') return;
+         //new chat
+    let currentChatId = 1; // Track active chat
+const chatHistory = {}; // Store all chats
 
-            let userDiv = document.createElement('div');
-            userDiv.classList.add('message', 'user-msg');
-            userDiv.innerHTML = `<img src='{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/40' }}' alt='User Avatar' class='avatar'><span>${userMsg}</span>`;
-            chatbox.appendChild(userDiv);
-            msgInput.value = '';
-            chatbox.scrollTop = chatbox.scrollHeight;
-
-            let typingDiv = document.createElement('div');
-            typingDiv.classList.add('message', 'bot-msg', 'typing');
-            typingDiv.innerHTML = `<img src='https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg' alt='Bot Avatar' class='avatar'><span>...</span>`;
-            chatbox.appendChild(typingDiv);
-            chatbox.scrollTop = chatbox.scrollHeight;
-
-            setTimeout(() => {
-                typingDiv.remove();
-                let botDiv = document.createElement('div');
-                botDiv.classList.add('message', 'bot-msg');
-                botDiv.innerHTML = `<img src='https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg' alt='Bot Avatar' class='avatar'><span>I'm here to help! What do you need?</span>`;
-                chatbox.appendChild(botDiv);
-                chatbox.scrollTop = chatbox.scrollHeight;
-            }, 1500);
+// Initialize first chat
+chatHistory[1] = {
+    name: "Chat 1",
+    messages: []
+};
+        function scrollToBottom() {
+            const chatBox = document.getElementById('content-box');
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        //dropdown JS
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $('#button-submit').on('click', function() {
+            const message = $('#input').val().trim();
+            if (message === '') return;
+
+            // Add user message
+            $('#content-box').append(`
+                <div class="d-flex justify-content-end mb-3">
+                    <div class="user-message">${message}</div>
+                    <div style="width:40px; height:40px; margin-left:10px;">
+                        <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/40' }}"
+                            style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                    </div>
+                </div>
+            `);
+            scrollToBottom();
+            $('#input').val('');
+
+            // Show typing indicator
+            const thinkingMsg = $(`
+                <div class="d-flex mb-3">
+                    <div style="width:40px; height:40px; margin-right:10px;">
+                        <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
+                            style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                    </div>
+                    <div class="bot-message">
+                        <div class="thinking-dots">
+                            <span>.</span><span>.</span><span>.</span>
+                        </div>
+                    </div>
+                </div>
+            `).appendTo('#content-box');
+            scrollToBottom();
+
+            // Send message to server
+            $.ajax({
+                type: 'POST',
+                url: '{{ url('send') }}',
+                data: {
+
+                    message: message
+                },
+                success: function(response) {
+                    thinkingMsg.remove();
+
+                    // Add bot response
+                    $('#content-box').append(`
+                        <div class="d-flex mb-3">
+                            <div style="width:40px; height:40px; margin-right:10px;">
+                                <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
+                                    style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                            </div>
+                            <div class="bot-message">
+                                ${response.reply}
+                            </div>
+                        </div>
+                    `);
+                    scrollToBottom();
+                }
+            });
+        });
+
         function toggleDropdown() {
-             document.getElementById("dropdown").classList.toggle("hidden");
+            const dropdown = document.getElementById('dropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         }
 
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-info')) {
+                document.getElementById('dropdown').style.display = 'none';
+            }
+        });
 
+        function typeWelcomeMessage() {
+            const welcomeText = "How can I assist you today?";
+            $('#content-box').append(`
+                <div class="d-flex mb-3">
+                    <div style="width:40px; height:40px; margin-right:10px;">
+                        <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
+                            style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                    </div>
+                    <div class="bot-message" id="welcome-message"></div>
+                </div>
+            `);
 
-
-    // upload file logic-------------------
-    document.getElementById("fileInput").addEventListener("change", function(event) {
-    let file = event.target.files[0];
-
-    if (!file) return; // No file selected
-
-    let formData = new FormData();
-    formData.append("file", file);
-
-    fetch("{{ route('upload.file') }}", {
-        method: "POST",
-        body: formData,
-        headers: {
-            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            let i = 0;
+            const typingInterval = setInterval(() => {
+                if (i < welcomeText.length) {
+                    $('#welcome-message').text(welcomeText.substring(0, i + 1));
+                    i++;
+                    scrollToBottom();
+                } else {
+                    clearInterval(typingInterval);
+                }
+            }, 100);
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message); // ✅ Success message
-        console.log("Uploaded File:", data.filename);
-    })
-    .catch(error => {
-        console.error("Error:", error);
+
+        $(document).ready(function() {
+            typeWelcomeMessage();
+
+            $('#input').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $('#button-submit').click();
+                }
+            });
+
+            $('#file-upload-btn').click(function() {
+                $('#file-input').click();
+            });
+
+            $('#file-input').change(function(e) {
+                if (e.target.files.length > 0) {
+                    alert('File selected: ' + e.target.files[0].name);
+                }
+            });
+//sidebar start
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleBtn = document.getElementById('toggleBtn');
+
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                mainContent.classList.toggle('shifted');
+                toggleBtn.classList.toggle('shifted');
+            });
+        });
+
+
+        // DOM load hone ke baad force apply karo
+        document.addEventListener('DOMContentLoaded', function() {
+            const contentBox = document.getElementById('content-box');
+            contentBox.style.overflow = 'auto';
+            contentBox.style.scrollbarWidth = 'none';
+            contentBox.style.msOverflowStyle = 'none';
+        });
+        //end
+
+
+//dropdown logo
+document.getElementById('logoDropdown').addEventListener('click', function(e) {
+        e.stopPropagation();
+        const menu = this.nextElementSibling;
+        menu.classList.toggle('show');
     });
-});
-// upload file end-------------------------------------------------
+
+    // Close when clicking outside
+    document.addEventListener('click', function() {
+        const menus = document.querySelectorAll('.logo-container .dropdown-menu');
+        menus.forEach(menu => menu.classList.remove('show'));
+    });
+
+    //end
+
+//new chat
+
+
     </script>
 </body>
-</html> --}}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" integrity="sha512-5A8nwdMOWrSz20fDsjczgUidUBR8liPYU+WymTZP1lmY9G6Oc7HlZv156XqnsgNUzTyMefFTcsFH/tnJE/+xBg==" crossorigin="anonymous" referrerpolicy="no-referrer" /> \
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-</head>
-<style>
-    *{
-        margin: 0;
-        padding: 0;
-    }
-    ::-webkit-scrollbar{
-        width: 5px;
-    }
-    ::-webkit-scrollbar-track{
-        background: #13254c;
-    }
-    ::-webkit-scrollbar-thumb{
-        background: #061128;
-    }
-</style>
-<body style="background: #05113b;">
-    <div>
-        <div class="container-fluid m-0 d-flex p-2">
-            <div class="pl-2" style="width: 40px;height: 50px;font-size: 180%;">
-                <i class="fa fa-angle-double-left text-white mt-2"></i>
-            </div>
-            <div style="width: 50px;height: 50px;">
-                <img src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" width="100%" height="100%" style="border-radius: 50px;">
-            </div>
-            <div class="text-white font-weight-bold ml-2 mt-2">
-                ChatBot
-            </div>
-        </div>
-        <div style="background: #061128;height: 2px;"></div>
-        <div id="content-box" class="container-fluid p-2" style="height: calc(100vh - 130px);overflow-y: scroll;">
-
-
-        </div>
-        <div class="container-fluid w-100 px-3 py-2 d-flex" style="background: #131f45;height: 62px;">
-            <div class="mr-2 pl-2" style="background: #ffffff1c;width: calc(100% - 45px);border-radius: 5px;">
-                <input id="input" class="text-white" type="text" name="input" style="background: none;width: 100%;height: 100%;border: 0;outline: none;">
-            </div>
-            <div id="button-submit" class="text-center" style="background: #4acfee;height: 100%;width: 50px;border-radius: 5px;">
-                <i class="fa fa-paper-plane text-white" aria-hidden="true" style="line-height: 45px;"></i>
-
-            </div>
-        </div>
-    </div>
-
-</body>
 </html>
-
-<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-<script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    })
-    $('#button-submit').on('click',function(){
-        $value = $('#input').val();
-        $('#content-box').append(`<div class="mb-2">
-                <div class="float-right px-3 py-2" style="width: 270px;background: #4acfee;border-radius: 10px;float: right;font-size: 85%;">
-                    `+$value+`
-                </div>
-                <div style="clear: both;"></div>
-            </div>`);
-
-
-            $.ajax({
-                type: 'post',
-                url: '{{url('send')}}',
-                data: {
-                    'message':$value
-                },
-                success: function(data){
-                    $('#content-box').append(` <div class="d-flex mb-2">
-                <div class="mr-2" style="width: 45px;height: 45px;">
-                <img src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" width="100%" height="100%" style="border-radius: 50px;">
-                </div>
-                <div class="text-white px-3 py-2" style="width: 270px;background: #13254b;border-radius: 10px;font-size: 85%;">
-                    `+data.reply+`
-                </div>
-            </div>`)
-            $value = $('#input').val('');
-                }
-            })
-    })
-</script>

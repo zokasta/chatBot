@@ -5,6 +5,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ChatBotController;
 use App\Http\Middleware\Authenticate;
+use App\Http\Controllers\ChatController;
 
 
 Route::get('/', function () {
@@ -30,7 +31,7 @@ Route::post('/logout', function () {
 })->name('logout');
 
 
-Route::get('/chatbot', [LoginController::class, 'dashboard'])->middleware('auth')->name('chatbot');
+Route::get('/home', [LoginController::class, 'dashboard'])->middleware('auth')->name('chatbot');
 
 
 // file upload route
@@ -51,3 +52,14 @@ Route::post('/upload-file', function (Request $request) {
 
 //for sending the data
 Route::post('/send',[ChatBotController::class,'chat']);
+
+Route::get('/chat', function(){
+    return view('index');
+})->name('chats');
+
+
+//for new chat
+Route::post('/chat/new', [ChatController::class, 'newChat'])->middleware('auth');
+// Route::get('/', [ChatController::class, 'index'])->name('chat.index');
+// Route::post('/send', [ChatController::class, 'send'])->name('chat.send');
+// Route::get('/history', [ChatController::class, 'history'])->name('chat.history');
