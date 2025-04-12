@@ -1,450 +1,586 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatBot</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-</head>
-<style>
-    :root {
-        --dark-bg: #0a0a12;
-        --darker-bg: #07070e;
-        --accent-blue: #3b82f6;
-        --light-blue: #6ec6ff;
-        --text-light: #f0f0f0;
-        --text-muted: #a0a0b0;
-    }
+    <style>
+        :root {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --accent-color: #5e72e4;
+            --user-message: #5e72e4;
+            --bot-message: #edf2f7;
+            --sidebar-bg: #2d3748;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --profile-bg: #ffffff;
+        }
 
-    body {
-        background: var(--dark-bg);
-        margin: 0;
-        padding: 0;
-        font-family: system-ui, -apple-system, sans-serif;
-    }
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            overflow: hidden !important;
+        }
 
-    /* Header */
-    .container-fluid.m-0.d-flex.p-2 {
-        background: var(--darker-bg);
-        border-bottom: 1px solid #1a1a2e;
-        align-items: center;
-    }
+        /* Header */
+        .header-container {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    .pl-2 {
-        color: var(--light-blue);
-        cursor: pointer;
-    }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-left: 60px;
+            /* Space for toggle button */
+        }
 
-    .text-white.font-weight-bold.ml-2.mt-2 {
-        color: var(--light-blue) !important;
-        font-weight: 600 !important;
-        margin-left: 10px !important;
-    }
+        .logo-text {
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
 
-    /* Chat Container */
-    #content-box {
-        background: var(--dark-bg);
-        height: calc(100vh - 130px) !important;
-        padding: 15px !important;
-    }
+        /* Profile Section */
+        .profile-section {
+            margin-left: auto;
+        }
 
-    /* User Message */
-    .float-right.px-3.py-2 {
-        background: var(--accent-blue) !important;
-        color: white !important;
-        border-radius: 18px 18px 0 18px !important;
-        max-width: 70%;
-        margin-left: auto;
-        margin-bottom: 8px;
-        font-size: 14px;
-        line-height: 1.4;
-    }
+        /* Chat Container */
+        #content-box {
+            background: var(--bg-primary);
+            height: calc(100vh - 130px);
+            padding: 20px;
+            overflow-y: scroll;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
 
-    /* Bot Message */
-    .d-flex.mb-2 {
-        margin-bottom: 15px !important;
-    }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        #content-box::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
+            display: none !important;
+        }
 
-    .text-white.px-3.py-2 {
-        background: #1a1a2e !important;
-        color: var(--text-light) !important;
-        border-radius: 18px 18px 18px 0 !important;
-        max-width: 70%;
-        font-size: 14px;
-        line-height: 1.4;
-    }
+        /* Messages */
+        .user-message {
+            background: var(--user-message);
+            color: white;
+            border-radius: 18px 4px 18px 18px;
+            max-width: 70%;
+            margin-left: auto;
+            margin-bottom: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-    /* Input Area */
-    .container-fluid.w-100.px-3.py-2.d-flex {
-        background: var(--darker-bg) !important;
-        border-top: 1px solid #1a1a2e;
-    }
+        .bot-message {
+            background: var(--bot-message);
+            color: var(--text-primary);
+            border-radius: 4px 18px 18px 18px;
+            max-width: 70%;
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
 
-    .mr-2.pl-2 {
-        background: #1a1a2e !important;
-        border-radius: 24px !important;
-        border: 1px solid #2a2a3e;
-    }
+        /* Input Area */
+        .input-container {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 12px 20px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+        }
 
-    #input {
-        color: var(--text-light) !important;
-        padding: 12px 15px !important;
-    }
+        .message-input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 12px 20px;
+            flex-grow: 1;
+            margin: 0 12px;
+            color: var(--text-primary);
+            outline: none;
+        }
 
-    #button-submit {
-        background: var(--accent-blue) !important;
-        border-radius: 50% !important;
-        width: 46px !important;
-        height: 46px !important;
+        .send-button {
+            background: var(--accent-color);
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .send-button:hover {
+            background: #4a63d2;
+            transform: translateY(-2px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: -280px;
+            padding: 1.5rem;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            overflow-y: auto;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none;
+            /* Chrome/Safari/Opera */
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .toggle-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background: var(--accent-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toggle-btn.shifted {
+            left: 300px;
+        }
+
+        .main-content {
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 0;
+        }
+
+        .main-content.shifted {
+            margin-left: 280px;
+        }
+
+        /* Profile Dropdown */
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--profile-bg);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .profile-btn:hover {
+            background: var(--bg-primary);
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            object-fit: cover;
+        }
+
+        .dropdown-menu {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+            position: absolute;
+            right: 0;
+            min-width: 140px;
+            z-index: 100;
+        }
+
+        .dropdown-item {
+            padding: 8px 16px;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: block;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-primary);
+        }
+
+        /* Animations */
+        @keyframes dot-pulse {
+
+            0%,
+            100% {
+                opacity: 0.2;
+                transform: translateY(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateY(-3px);
+            }
+        }
+
+        .thinking-dots span {
+            animation: dot-pulse 1.5s infinite;
+        }
+
+        .thinking-dots span:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .thinking-dots span:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        .main-content {
+            overflow: hidden !important;
+        }
+
+
+        /* dropdown logo */
+        .logo-container .dropdown {
+        position: relative;
         display: flex;
         align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
     }
 
-    #button-submit:hover {
-        background: #2563eb !important;
-        transform: translateY(-2px);
+    .logo-container .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        padding: 8px 0;
+        min-width: 150px;
+        z-index: 1000;
+        display: none;
     }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-        width: 6px;
+    .logo-container .dropdown-menu.show {
+        display: block;
     }
 
-    ::-webkit-scrollbar-track {
-        background: #1a1a2e;
+    .logo-container .dropdown-item {
+        padding: 8px 16px;
+        color: var(--text-primary);
+        text-decoration: none;
+        display: block;
     }
 
-    ::-webkit-scrollbar-thumb {
-        background: var(--accent-blue);
-        border-radius: 3px;
+    .logo-container .dropdown-item:hover {
+        background: var(--bg-primary);
     }
+    </style>
+</head>
 
-    /* user logout */
-   /* User Dropdown Specific CSS */
-.chat-header {
-    margin-left: auto; /* Pushes to far right */
-}
+<body>
+    <!-- Toggle Button -->
+    <button id="toggleBtn" class="toggle-btn">
+        <i class="fas fa-bars"></i>
+    </button>
 
-.user-info {
-    position: relative;
-}
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header mb-4">
+            <h4 class="mb-0">MasterBot</h4>
+        </div>
 
-/* Oval Button Styling */
-.user-dropdown-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #1a1a2e !important;
-    color: #6ec6ff !important;
-    padding: 6px 12px 6px 6px !important;
-    border-radius: 50px !important; /* Oval shape */
-    border: 1px solid #3b82f6 !important;
-    transition: all 0.2s;
-}
-
-.user-dropdown-btn:hover {
-    background: #25253e !important;
-}
-
-.user-avatar {
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 50% !important;
-    border: 2px solid #6ec6ff !important;
-    object-fit: cover;
-}
-
-.user-name {
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* Dropdown Menu */
-.dropdown-menu {
-    position: absolute;
-    right: 0;
-    top: 120%;
-    width: 140px;
-    background: #1a1a2e;
-    border: 1px solid #3b82f6;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    display: none;
-    z-index: 10;
-}
-
-.dropdown-menu button {
-    width: 100%;
-    padding: 8px 12px;
-    text-align: left;
-    color: #f0f0f0;
-    background: transparent;
-    border: none;
-    border-radius: 4px;
-}
-
-.dropdown-menu button:hover {
-    background: #25253e;
-    color: #6ec6ff;
-}
-
-/* Thinking dots animation */
-.thinking-dots span {
-    opacity: 0;
-    animation: dot-pulse 1.5s infinite;
-    font-size: 24px;
-    line-height: 0;
-}
-
-.thinking-dots span:nth-child(1) { animation-delay: 0s; }
-.thinking-dots span:nth-child(2) { animation-delay: 0.5s; }
-.thinking-dots span:nth-child(3) { animation-delay: 1s; }
-
-@keyframes dot-pulse {
-    0% { opacity: 0; transform: translateY(0); }
-    50% { opacity: 1; transform: translateY(-5px); }
-    100% { opacity: 0; transform: translateY(0); }
-}
-
-
-#file-upload-btn:hover {
-    opacity: 0.8;
-}
-
-.fa-plus {
-    font-size: 1.2rem;
-    transition: all 0.2s;
-}
-
-
-</style>
-<body style="background: #0a0a12;">
-    <!-- EXACTLY YOUR ORIGINAL HTML STRUCTURE -->
-    <div>
-        <div class="container-fluid m-0 d-flex p-2">
-
-            {{-- <div style="width: 50px;height: 50px;">
-                <img src="https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg" width="100%" height="100%" style="border-radius: 50px;">
-            </div> --}}
-            <div class="text-white font-weight-bold ml-2 mt-2" style="font-size: 1.5rem; display: flex; align-items: center;">
-                <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
-                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
-                <span>MasterBot</span>
+        <button class="btn w-100 my-3" id="newChatBtn" style="background: var(--accent-color); color: white; border: none;">+ New
+            Chat</button>
+            <div id="chat-list">
+                <!-- Dynamic chat buttons yahan aayenge -->
             </div>
-            {{-- //userDetails --}}
-            <div class="chat-header">
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="main-content">
+        <div class="header-container">
+            <!-- Update your logo container with this code -->
+<div class="logo-container">
+    <div class="dropdown">
+        <!-- Wrapped both logo and text in dropdown trigger -->
+        <div class="d-flex align-items-center dropdown-toggle" id="logoDropdown" style="cursor: pointer;">
+            <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
+                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+            <span class="logo-text">MasterBot</span>
+        </div>
+        <ul class="dropdown-menu" aria-labelledby="logoDropdown">
+            <li><a class="dropdown-item" href="#">OpenAI</a></li>
+            <li><a class="dropdown-item" href="#">Llama</a></li>
+            <li><a class="dropdown-item" href="#">Microsoft</a></li>
+        </ul>
+    </div>
+</div>
+
+
+            <div class="profile-section">
                 <div class="user-info">
-                    <div class="relative">
-                        <button onclick="toggleDropdown()" class="user-dropdown-btn">
-                            <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/40' }}"
-                                 alt="User Avatar" class="user-avatar">
-                            <span class="user-name">{{ auth()->user()->name }}</span>
-                        </button>
-                        <div id="dropdown" class="dropdown-menu">
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="logout-btn">Logout</button>
-                            </form>
-                        </div>
+                    <button onclick="toggleDropdown()" class="profile-btn">
+                        <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/40' }}"
+                            alt="User Avatar" class="profile-avatar">
+                        <span>{{ auth()->user()->name }}</span>
+                    </button>
+                    <div id="dropdown" class="dropdown-menu">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="dropdown-item">Logout</button>
+                        </form>
                     </div>
                 </div>
             </div>
-            {{-- end Here --}}
         </div>
-        <div style="background: #1a1a2e;height: 2px;"></div>
-        <div id="content-box" class="container-fluid p-2" style="height: calc(100vh - 130px);overflow-y: scroll;">
-            <!-- Messages appear here -->
-        </div>
-        <div class="container-fluid w-100 px-3 py-2 d-flex" style="background: #07070e;height: 62px;">
-            <div id="file-upload-btn" style="width:40px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
-                <i class="fas fa-plus text-white" style="margin-left: 20px;"></i>
-                <input type="file" id="file-input" style="display:none;" accept=".pdf,.jpg,.png">
-            </div>
-            <div class="mr-2 pl-2" style="background: #1a1a2e;width: calc(100% - 45px);border-radius: 5px;">
 
-                <input id="input" class="text-white" type="text" name="input" style="background: none;width: 100%;height: 100%;border: 0;outline: none;" placeholder="Type Something...">
+        <div id="content-box">
+            <!-- Messages will appear here -->
+        </div>
+
+        <div class="input-container">
+            <div id="file-upload-btn" style="cursor: pointer;">
+                <i class="fas fa-plus" style="color: var(--text-secondary);"></i>
+                <input type="file" id="file-input" style="display: none;" accept=".pdf,.jpg,.png">
             </div>
-            <div id="button-submit" class="text-center" style="background: #3b82f6;height: 100%;width: 50px;border-radius: 5px;">
-                <i class="fa fa-paper-plane text-white" aria-hidden="true" style="line-height: 45px;"></i>
-            </div>
+            <input id="input" class="message-input" type="text" placeholder="Type Something...">
+            <button id="button-submit" class="send-button">
+                <i class="fa fa-paper-plane"></i>
+            </button>
         </div>
     </div>
 
-    <!-- YOUR ORIGINAL JAVASCRIPT (NO CHANGES) -->
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script>
+         //new chat
+    let currentChatId = 1; // Track active chat
+const chatHistory = {}; // Store all chats
+
+// Initialize first chat
+chatHistory[1] = {
+    name: "Chat 1",
+    messages: []
+};
         function scrollToBottom() {
-    const chatBox = document.getElementById('content-box');
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
+            const chatBox = document.getElementById('content-box');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
-        })
-        $('#button-submit').on('click',function(){
-            $value = $('#input').val();
-            // Replace your user message code with this:
-$('#content-box').append(`
-    <div class="d-flex mb-2" style="justify-content: flex-end">
-        <div class="float-right px-3 py-2" style="width:270px;background:#4acfee;border-radius:10px;font-size:85%;margin-right:10px">
-            ${$value}
-        </div>
-        <div style="width:45px;height:45px">
-            <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/45' }}"
-                 style="width:100%;height:100%;border-radius:50%">
-        </div>
-    </div>
-`);
-                scrollToBottom();
+        });
 
+        $('#button-submit').on('click', function() {
+            const message = $('#input').val().trim();
+            if (message === '') return;
 
-                $.ajax({
-                    type: 'post',
-                    url: '{{url('send')}}',
-                    data: {
-                        'message':$value
-                    },
-
-                //     success: function(data){
-                //         $('#content-box').append(` <div class="d-flex mb-2">
-                //     <div class="mr-2" style="width: 45px;height: 45px;">
-                //     <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg" width="100%" height="100%" style="border-radius: 50px;">
-                //     </div>
-                //     <div class="text-white px-3 py-2" style="width: 270px;background: #13254b;border-radius: 10px;font-size: 85%;">
-                //     ${data.reply}
-                //     </div>
-                // </div>`)
-                // $value = $('#input').val('');
-                //     }
-
-                // Add this to your AJAX call
-success: function(data) {
-    $value = $('#input').val('');
-
-    // 1. Show thinking animation
-    const thinkingMsg = $(`
-        <div class="d-flex mb-2">
-            <div class="mr-2" style="width:45px;height:45px">
-                <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
-                     style="width:100%;height:100%;border-radius: 50px">
-            </div>
-            <div class="text-white px-3 py-2" style="width:270px;background:#13254b;border-radius:10px;font-size:85%;margin-left:10px;">
-                <div class="thinking-dots">
-                    <span>.</span><span>.</span><span>.</span>
+            // Add user message
+            $('#content-box').append(`
+                <div class="d-flex justify-content-end mb-3">
+                    <div class="user-message">${message}</div>
+                    <div style="width:40px; height:40px; margin-left:10px;">
+                        <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://via.placeholder.com/40' }}"
+                            style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                    </div>
                 </div>
-            </div>
-        </div>
-    `).appendTo('#content-box');
-    scrollToBottom();
+            `);
+            scrollToBottom();
+            $('#input').val('');
 
-
-    // 2. Wait 2 seconds, then show reply
-    setTimeout(() => {
-        thinkingMsg.remove(); // Remove dots
-
-        // Add bot reply
-        $('#content-box').append(`
-            <div class="d-flex mb-2">
-                <div class="mr-2" style="width:45px;height:45px">
-                    <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
-                         style="width:100%;height:100%;border-radius:50px">
+            // Show typing indicator
+            const thinkingMsg = $(`
+                <div class="d-flex mb-3">
+                    <div style="width:40px; height:40px; margin-right:10px;">
+                        <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
+                            style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                    </div>
+                    <div class="bot-message">
+                        <div class="thinking-dots">
+                            <span>.</span><span>.</span><span>.</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="text-white px-3 py-2" style="width:270px;background:#13254b;border-radius:10px;font-size:85%;margin-left:10px;">
-                    ${data.reply}
+            `).appendTo('#content-box');
+            scrollToBottom();
 
-                </div>
-            </div>
-        `);
-        scrollToBottom();
+            // Send message to server
+            $.ajax({
+                type: 'POST',
+                url: '{{ url('send') }}',
+                data: {
+                    message: message
+                },
+                success: function(response) {
+                    thinkingMsg.remove();
 
+                    // Add bot response
+                    $('#content-box').append(`
+                        <div class="d-flex mb-3">
+                            <div style="width:40px; height:40px; margin-right:10px;">
+                                <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
+                                    style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                            </div>
+                            <div class="bot-message">
+                                ${response.reply}
+                            </div>
+                        </div>
+                    `);
+                    scrollToBottom();
+                }
+            });
+        });
 
-
-        // Scroll to bottom
-        $('#content-box').scrollTop($('#content-box')[0].scrollHeight);
-    }, 2000);
-}
-
-                })
-        })
-// ------------------------------------------------
-        // Add this to your existing script
-function toggleDropdown() {
-    const dropdown = document.getElementById('dropdown');
-    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-}
-
-// Close when clicking outside
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.user-info')) {
-        document.getElementById('dropdown').style.display = 'none';
-    }
-});
-
-
-
-// -----------------------------------------------------------------------------------------
-// Add this right after your $(document).ready() or at the start of your script
-function typeWelcomeMessage() {
-    const welcomeText = "How can I assist you today?";
-    const welcomeElement = $('#content-box').append(`
-        <div class="d-flex mb-2">
-            <div class="mr-2" style="width: 45px;height: 45px;">
-                <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
-                     width="100%" height="100%" style="border-radius: 50px;">
-            </div>
-            <div class="text-white px-3 py-2"
-                 style="width: 270px;background: #13254b;border-radius: 10px;font-size: 85%;margin-left:10px;"
-                 id="welcome-message"></div>
-        </div>
-    `);
-
-    let i = 0;
-    const typingInterval = setInterval(() => {
-        if (i < welcomeText.length) {
-            $('#welcome-message').text(welcomeText.substring(0, i+1));
-            i++;
-            $('#content-box').scrollTop($('#content-box')[0].scrollHeight);
-        } else {
-            clearInterval(typingInterval);
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
         }
-    }, 100); // Adjust speed here (milliseconds per character)
-}
 
-// Call this function when the chat loads
-$(document).ready(function() {
-    typeWelcomeMessage();
-    // Rest of your existing code...
-});
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-info')) {
+                document.getElementById('dropdown').style.display = 'none';
+            }
+        });
+
+        function typeWelcomeMessage() {
+            const welcomeText = "How can I assist you today?";
+            $('#content-box').append(`
+                <div class="d-flex mb-3">
+                    <div style="width:40px; height:40px; margin-right:10px;">
+                        <img src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
+                            style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                    </div>
+                    <div class="bot-message" id="welcome-message"></div>
+                </div>
+            `);
+
+            let i = 0;
+            const typingInterval = setInterval(() => {
+                if (i < welcomeText.length) {
+                    $('#welcome-message').text(welcomeText.substring(0, i + 1));
+                    i++;
+                    scrollToBottom();
+                } else {
+                    clearInterval(typingInterval);
+                }
+            }, 100);
+        }
+
+        $(document).ready(function() {
+            typeWelcomeMessage();
+
+            $('#input').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $('#button-submit').click();
+                }
+            });
+
+            $('#file-upload-btn').click(function() {
+                $('#file-input').click();
+            });
+
+            $('#file-input').change(function(e) {
+                if (e.target.files.length > 0) {
+                    alert('File selected: ' + e.target.files[0].name);
+                }
+            });
+//sidebar start
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleBtn = document.getElementById('toggleBtn');
+
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                mainContent.classList.toggle('shifted');
+                toggleBtn.classList.toggle('shifted');
+            });
+        });
 
 
+        // DOM load hone ke baad force apply karo
+        document.addEventListener('DOMContentLoaded', function() {
+            const contentBox = document.getElementById('content-box');
+            contentBox.style.overflow = 'auto';
+            contentBox.style.scrollbarWidth = 'none';
+            contentBox.style.msOverflowStyle = 'none';
+        });
+        //end
 
-// ------------------------------------------------------------------------------
-// Handle Enter key in input field
-$('#input').on('keypress', function(e) {
-    if (e.which === 13) { // 13 is Enter key code
-        $('#button-submit').click(); // Trigger click on send button
-    }
-});
 
-// -----------------------------------------------------------
-// Trigger file input when plus button is clicked
-document.getElementById('file-upload-btn').addEventListener('click', function() {
-    document.getElementById('file-input').click();
-});
+//dropdown logo
+document.getElementById('logoDropdown').addEventListener('click', function(e) {
+        e.stopPropagation();
+        const menu = this.nextElementSibling;
+        menu.classList.toggle('show');
+    });
 
-// Handle selected file
-document.getElementById('file-input').addEventListener('change', function(e) {
-    if (e.target.files.length > 0) {
-        alert('File selected: ' + e.target.files[0].name);
-        // Add your file upload logic here
-    }
-});
+    // Close when clicking outside
+    document.addEventListener('click', function() {
+        const menus = document.querySelectorAll('.logo-container .dropdown-menu');
+        menus.forEach(menu => menu.classList.remove('show'));
+    });
+
+    //end
+
+//new chat
+
 
     </script>
 </body>
+
 </html>
